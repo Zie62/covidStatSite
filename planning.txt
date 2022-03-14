@@ -1,3 +1,3 @@
-Make the selection page have a dropdown for country, which will further load provinces.
+Make cities update when countries are updated as well.
 Total Report page for global statistics.
-Local report page which is responded with after the selection page's form is submitted.
+Local report page which is responded with after the selection (home) page's form is submitted.

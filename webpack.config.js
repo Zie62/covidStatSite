@@ -3,7 +3,7 @@ const htmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     entry:{
-        options: "./src/index.js", regions: './src/regionCodes.js'
+        options: "./src/index.js"
     },
     output: {
         path: path.join(__dirname, 'production')
@@ -30,13 +30,6 @@ module.exports = {
             inject:true,
             chunks: ['options'],
             filename: 'index.html'
-        }),
-        new htmlWebpackPlugin({
-            title: 'Regions Page',
-            template: './src/index.html',
-            inject:true,
-            chunks: ['regions'],
-            filename: 'regions.html'
         })
     ]
 }

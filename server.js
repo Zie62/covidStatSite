@@ -1,9 +1,7 @@
 const express = require('express');
 const path = require('path')
 const cors = require('cors')
-const cookieParser = require('cookie-parser');
 const axios = require('axios');
-const { getHeapCodeStatistics } = require('v8');
 require('dotenv').config();
 
 const PORT = process.env.PORT || 5000;
@@ -20,10 +18,10 @@ app.set('trust proxy', 1)
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "production", "index.html"))
 })
-app.get('/regions', (req, res) =>{
-    res.sendFile(path.join(__dirname, 'production', 'regions.html'))
+app.get("/test", (req, res) => {
+    res.sendFile(path.join(__dirname, "production", "test.html"))
 })
-app.get('/regioncodes', async (req, res) => {
+app.post('/regioncodes', async (req, res) => {
     let options = {
         method: 'GET',
         url: 'https://covid-19-statistics.p.rapidapi.com/regions',
@@ -32,11 +30,49 @@ app.get('/regioncodes', async (req, res) => {
             'x-rapidapi-key': process.env.RAPIDKEY
         }
     }
-    try{
+    try {
         let codes = await axios.request(options)
         res.json(codes.data.data)
     }
-    catch(error){
+    catch (error) {
+        console.log(error)
+        res.status(500).send();
+    }
+})
+app.post("/localregions", async (req, res) => {
+    let options = {
+        method: 'GET',
+        url: 'https://covid-19-statistics.p.rapidapi.com/provinces',
+        params: { iso: req.body.iso },
+        headers: {
+            'x-rapidapi-host': process.env.RAPIDHOST,
+            'x-rapidapi-key': process.env.RAPIDKEY
+        }
+    }
+    try {
+        let codes = await axios.request(options)
+        res.json(codes.data.data)
+    }
+    catch (error) {
+        console.log(error)
+        res.status(500).send();
+    }
+})
+app.post("/regionreports", async (req, res) => {
+    let options = {
+        method: 'GET',
+        url: 'https://covid-19-statistics.p.rapidapi.com/reports',
+        params: { iso: req.body.iso, region_province: req.body.province },
+        headers: {
+            'x-rapidapi-host': process.env.RAPIDHOST,
+            'x-rapidapi-key': process.env.RAPIDKEY
+        }
+    }
+    try{
+        let info = await axios.request(options)
+        res.json(info.data.data)
+    }
+    catch (error){
         console.log(error)
         res.status(500).send();
     }
