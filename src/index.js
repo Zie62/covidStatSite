@@ -9,8 +9,8 @@ const Options = () => {
     const [selections, setSelections] = useState({ countries: [{ iso: "CHN", name: "China" }], regions: [{ province: "" }], cities: [{ name: "" }] })
     const handleSubmit = (e) => {
         e.preventDefault();
-        //this is format for where to find value of a given parameter.
-        console.log(e.target.region.value);
+        //e.target.[fieldname].value will return the relevant data from form submission.
+        console.log((new Date(e.target.date.value)).toUTCString());
         //eventually, this will have an api call to return the relevant, selected data
     }
     useEffect(async () => {
@@ -18,6 +18,8 @@ const Options = () => {
         let countries = await retrieveOptions("/regioncodes", {})
         let regions = await retrieveOptions("/localregions", { iso: options.iso })
         setSelections({ ...selections, countries: countries, regions: regions })
+        //resets the selected index of the region-select element to 0.
+        document.getElementById("region-select").selectedIndex = 0;
         setOptions({...options, region_province: regions[0].province})
     }, options.iso, options.region_province)
     useEffect(async () => {
@@ -33,39 +35,41 @@ const Options = () => {
         if (cities.data) {
             cities = cities.data[0].region.cities
         }
-        //sometimes the data immediately has an array instead of a data property equal to an array.
+        //sometimes the data immediately has an array instead of a data key with a value of an array.
         else if (cities[0]) {
             cities = cities[0].region.cities
         }
-        //not all regions have cities, this covers that contingency. 
+        //not all regions have city specific data, this covers that contingency. 
         else {
             cities = [{ name: "" }]
         }
+        //resets the city selector to the first option
+        document.getElementById("city-select").selectedIndex = 0;
         setSelections({ ...selections, cities: cities })
     }, options.region_province)
     return (
         <div>
             <form id="option-inputs" onSubmit={(e) => { handleSubmit(e) }}>
                 <label className="input-labels" for="countryiso">Select your country:</label><br />
-                <select name="countryiso" onChange={(e) => { setOptions({ ...options, iso: e.target.value, region_province: "", county_name: "" }) }}>
+                <select id="country-select" name="countryiso" onChange={(e) => { setOptions({ ...options, iso: e.target.value, region_province: "", county_name: "" }) }}>
                     {selections.countries.map((country) => (
                         <option value={country.iso}>{country.name}</option>
                     ))}
                 </select><br />
                 <label className="input-labels" for="region">Select your province or state:</label><br />
-                <select name="region" onChange={(e) => { setOptions({ ...options, region_province: e.target.value, county_name: "" }) }}>
-                    {selections.regions.map((region) => (
-                        <option value={region.province}>{region.province}</option>
+                <select id="region-select" name="region" onChange={(e) => { setOptions({ ...options, region_province: e.target.value, county_name: "" }) }}>
+                    {selections.regions.map((region, i) => (
+                        <option key={i} value={region.province}>{region.province}</option>
                     ))}
                 </select><br />
-                <label className="input-labels" for='city'>Enter your county or city's name(Not all counties or cities have data): </label><br />
-                <select name="city" onChange={(e) => { setOptions({ ...options, county_name: e.target.value }) }}>
-                    {selections.cities.map((city) => (
-                        <option value={city.name}>{city.name}</option>
+                <label className="input-labels" for='city'>Select your county or city's name(Not all counties or cities have data): </label><br />
+                <select id="city-select" name="city" onChange={(e) => { setOptions({ ...options, county_name: e.target.value }) }}>
+                    {selections.cities.map((city, i) => (
+                        <option key={i} value={city.name}>{city.name}</option>
                     ))}
                 </select><br />
-                <label className="input-labels" for='date'>Enter the date you want data for (YYYY-MM-DD): </label><br />
-                <input name="date" value={options.date} onChange={(e) => setOptions({ ...options, date: e.target.value })} />
+                <label className="input-labels" for='date'>Enter the date you want data for: </label><br />
+                <input type="date" name="date" value={options.date} onChange={(e) => setOptions({ ...options, date: e.target.value })} />
                 <input type="submit" value="submit" />
             </form>
         </div>
