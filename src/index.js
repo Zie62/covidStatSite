@@ -1,33 +1,84 @@
+import './app.css'
+import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom'
-import retrieveOptions from './components/retrieveOptions';
+
+//dataless countries which are retrieved from the API are put in this array to be filtered.
+//doing this manually as it would take an extra 217 API requests per load to do procedurally.
+const datalessCountries = ["Western Sahara", "Martinique", "Liechtenstein", 
+"Faroe Islands", "Saint Barthelemy", "Gibraltar", "Others"]
 
 const Options = () => {
     //options object for the various search parameters
-    const [options, setOptions] = useState({ iso: "CHN", region_province: "Anhui", county_name: "", date: new Date(Date.now()).toLocaleDateString("en-ca").replace(/\//ig, "-") })
+    const [options, setOptions] = useState({ iso: "CHN", region_province: "Anhui", city_name: "No data", date: new Date(Date.now() - 86400000).toLocaleDateString("en-ca").replace(/\//ig, "-") })
     //default values hide loading in background - china is the top of the countries list for this API.
-    const [selections, setSelections] = useState({ countries: [{ iso: "CHN", name: "China" }], regions: [{ province: "" }], cities: [{ name: "" }] })
-    const handleSubmit = (e) => {
+    const [selections, setSelections] = useState({ countries: [{ iso: "CHN", name: "China" }], regions: [{ province: "No data" }], cities: [{ name: "No data" }] })
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        //(new Date(e.target.date.value)).toUTCString() gives utc string for entered date
         //e.target.[fieldname].value will return the relevant data from form submission.
-        console.log((new Date(e.target.date.value)).toUTCString());
-        //eventually, this will have an api call to return the relevant, selected data
+        Object.keys(options).forEach((property) => {
+            //if an option is empty, delete it before the query.
+            if (!options[property] || options[property] == "No data") {
+                delete options[property]
+            }
+        })
+        let report = await axios.post("/report", options)
+        //keep in mind this is the data for province, city data is nested deeper
+        console.log(report)
     }
+
     useEffect(async () => {
         //updates countries and regions on load, and updates regions when a new country is selected
-        let countries = await retrieveOptions("/regioncodes", {})
-        let regions = await retrieveOptions("/localregions", { iso: options.iso })
-        setSelections({ ...selections, countries: countries, regions: regions })
-        //resets the selected index of the region-select element to 0.
-        document.getElementById("region-select").selectedIndex = 0;
-        setOptions({...options, region_province: regions[0].province})
+        try {
+            let countries = await axios.post("/regioncodes", {})
+            let regions = await axios.post("/localregions", { iso: options.iso })
+            regions = regions.data
+            countries = countries.data
+            /*removes counties from regions box (only want states), 
+                as they dont correspond to any data*/
+            if (options.iso == "USA") {
+                let regex = /,\s[A-Za-z]+/
+                for (let i = 0; i < regions.length; i++) {
+                    if (regex.test(regions[i].province)) {
+                        /*removes an entry from the regions array if it contains 
+                        ', AA' as a substring where AA=state symbol
+                        (ex. norfolk county, MA) as these are counties, not states*/
+                        regions.splice(i, 1)
+                    }
+                }
+            }
+            for(let i=0; i<countries.length; i++){
+                if (datalessCountries.includes(countries[i].name)){
+                    countries.splice(i, 1)
+                    i--
+                }
+            }
+            console.log(countries)
+            //if the first regional province is empty & there are other options, remove the empty option.
+            if (!regions[0].province && regions.length > 1) {
+                regions.shift();
+            }
+            else if (regions.length == 1) {
+                regions = [{ province: "No data" }]
+            }
+            setSelections({ ...selections, countries: countries, regions: regions })
+            //resets the selected index of the region-select element to 0.
+            document.getElementById("region-select").selectedIndex = 0;
+            setOptions({ ...options, region_province: regions[0].province })
+        }
+        catch (error) {
+            console.log(error)
+            setSelections({ ...selections, countries: [{ iso: "error", name: "there was an error retrieving data" }] })
+        }
     }, options.iso, options.region_province)
+
     useEffect(async () => {
         /*This useEffect updates the counties / cities available to select whenever a new
         province / state is selected on the UI. */
-        console.log("Changed")
-        console.log(options.region_province)
-        let cities = await retrieveOptions("/regionreports", { iso: options.iso, province: options.region_province })
+        let cities = await axios.post("/regionreports", { iso: options.iso, region_province: options.region_province })
+        cities = cities.data
         /*The API is inconsistently formatted, meaning I have to check for specific formatting
         in order to not throw errors. Some areas have an extra data object, some areas do not
         have a region field or return empty data, so this checks and selects the behavior
@@ -41,35 +92,39 @@ const Options = () => {
         }
         //not all regions have city specific data, this covers that contingency. 
         else {
-            cities = [{ name: "" }]
+            cities = [{ name: "No data" }]
         }
         //resets the city selector to the first option
         document.getElementById("city-select").selectedIndex = 0;
         setSelections({ ...selections, cities: cities })
+        if (cities[0]) {
+            setOptions({ ...options, city_name: cities[0].name })
+        }
     }, options.region_province)
     return (
-        <div>
+        <div id="form-box">
             <form id="option-inputs" onSubmit={(e) => { handleSubmit(e) }}>
                 <label className="input-labels" for="countryiso">Select your country:</label><br />
-                <select id="country-select" name="countryiso" onChange={(e) => { setOptions({ ...options, iso: e.target.value, region_province: "", county_name: "" }) }}>
+                <select id="country-select" className="selector" name="countryiso" onChange={(e) => { setOptions({ ...options, iso: e.target.value, region_province: "", city_name: "" }) }}>
                     {selections.countries.map((country) => (
-                        <option value={country.iso}>{country.name}</option>
+                        <option className="options" value={country.iso}>{country.name}</option>
                     ))}
                 </select><br />
                 <label className="input-labels" for="region">Select your province or state:</label><br />
-                <select id="region-select" name="region" onChange={(e) => { setOptions({ ...options, region_province: e.target.value, county_name: "" }) }}>
+                <select id="region-select" className="selector" name="region" onChange={(e) => { setOptions({ ...options, region_province: e.target.value, city_name: "" }) }}>
                     {selections.regions.map((region, i) => (
-                        <option key={i} value={region.province}>{region.province}</option>
+                        <option className="options" key={i} value={region.province}>{region.province}</option>
                     ))}
                 </select><br />
-                <label className="input-labels" for='city'>Select your county or city's name(Not all counties or cities have data): </label><br />
-                <select id="city-select" name="city" onChange={(e) => { setOptions({ ...options, county_name: e.target.value }) }}>
+                <label className="input-labels" for='city'>Select your city's name(Not all cities have data): </label><br />
+                <select id="city-select" className="selector" name="city" onChange={(e) => { setOptions({ ...options, city_name: e.target.value }) }}>
                     {selections.cities.map((city, i) => (
-                        <option key={i} value={city.name}>{city.name}</option>
+                        <option className="options" key={i} value={city.name}>{city.name}</option>
                     ))}
                 </select><br />
                 <label className="input-labels" for='date'>Enter the date you want data for: </label><br />
-                <input type="date" name="date" value={options.date} onChange={(e) => setOptions({ ...options, date: e.target.value })} />
+                {/*Max date is the day before whatever day it is, min date is first day of data for china from the API. */}
+                <input id="date-select" className="selector" max={new Date(Date.now() - 86400000).toLocaleDateString('en-ca')} min={"2020-01-22"} type="date" name="date" value={options.date} onChange={(e) => setOptions({ ...options, date: e.target.value })} /> <br />
                 <input type="submit" value="submit" />
             </form>
         </div>

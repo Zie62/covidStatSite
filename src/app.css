@@ -1,0 +1,44 @@
+html{
+    height:100%;
+    width: 100%;
+}
+body{
+    height:100%;
+    width: 100%;
+    margin: 0;
+}
+#root{
+    display:flex;
+    height:100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#form-box{
+    display:flex;
+    flex-direction: column;
+    width: 80%;
+    height: 60%;
+    border: 2px solid black;
+    margin-top: 5px;
+    justify-content: center;
+    align-items: center;
+}
+#option-inputs{
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.input-labels{
+    font-size: x-large;
+}
+.selector{
+    margin: 10px 10px;
+    height:10%;
+    width: 80%;
+    font-size: x-large;
+}
+.options{
+    font-size: large
+}

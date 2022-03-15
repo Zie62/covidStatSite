@@ -59,10 +59,31 @@ app.post("/localregions", async (req, res) => {
     }
 })
 app.post("/regionreports", async (req, res) => {
+    //this is used to get the cities of a region
     let options = {
         method: 'GET',
         url: 'https://covid-19-statistics.p.rapidapi.com/reports',
-        params: { iso: req.body.iso, region_province: req.body.province },
+        params: req.body,
+        headers: {
+            'x-rapidapi-host': process.env.RAPIDHOST,
+            'x-rapidapi-key': process.env.RAPIDKEY
+        }
+    }
+    try{
+        let info = await axios.request(options)
+        res.json(info.data.data)
+    }
+    catch (error){
+        console.log(error)
+        res.status(500).send();
+    }
+})
+app.post("/report", async (req, res) => {
+    //this supplies the final report of data from the selected options on the form.
+    let options = {
+        method: 'GET',
+        url: 'https://covid-19-statistics.p.rapidapi.com/reports',
+        params: req.body,
         headers: {
             'x-rapidapi-host': process.env.RAPIDHOST,
             'x-rapidapi-key': process.env.RAPIDKEY
