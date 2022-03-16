@@ -1,3 +1,2 @@
-Make cities update when countries are updated as well.
-Total Report page for global statistics.
-Local report page which is responded with after the selection (home) page's form is submitted.
+Make city specific queries display that they are in fact city specific.
+Clean up fringe errors / contingencies.

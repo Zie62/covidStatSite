@@ -18,8 +18,8 @@ app.set('trust proxy', 1)
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "production", "index.html"))
 })
-app.get("/test", (req, res) => {
-    res.sendFile(path.join(__dirname, "production", "test.html"))
+app.get("/report", (req, res) => {
+    res.sendFile(path.join(__dirname, "production", "report.html"))
 })
 app.post('/regioncodes', async (req, res) => {
     let options = {

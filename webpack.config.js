@@ -3,7 +3,7 @@ const htmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     entry:{
-        options: "./src/index.js"
+        options: "./src/index.js", report: './src/report.js'
     },
     output: {
         path: path.join(__dirname, 'production')
@@ -30,6 +30,13 @@ module.exports = {
             inject:true,
             chunks: ['options'],
             filename: 'index.html'
+        }),
+        new htmlWebpackPlugin({
+            title: 'Results Page',
+            template: './src/index.html',
+            inject:true,
+            chunks: ['report'],
+            filename: 'report.html'
         })
     ]
 }

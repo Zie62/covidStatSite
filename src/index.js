@@ -1,7 +1,7 @@
 import './app.css'
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom'
+import ReactDOM from 'react-dom';
 
 //dataless countries which are retrieved from the API are put in this array to be filtered.
 //doing this manually as it would take an extra 217 API requests per load to do procedurally.
@@ -10,23 +10,25 @@ const datalessCountries = ["Western Sahara", "Martinique", "Liechtenstein",
 
 const Options = () => {
     //options object for the various search parameters
-    const [options, setOptions] = useState({ iso: "CHN", region_province: "Anhui", city_name: "No data", date: new Date(Date.now() - 86400000).toLocaleDateString("en-ca").replace(/\//ig, "-") })
+    const [options, setOptions] = useState({ iso: "CHN", region_province: "Overall", city_name: "Overall", date: new Date(Date.now() - 86400000).toLocaleDateString("en-ca").replace(/\//ig, "-") })
     //default values hide loading in background - china is the top of the countries list for this API.
-    const [selections, setSelections] = useState({ countries: [{ iso: "CHN", name: "China" }], regions: [{ province: "No data" }], cities: [{ name: "No data" }] })
+    const [selections, setSelections] = useState({ countries: [{ iso: "CHN", name: "China" }], regions: [{ province: "Overall" }], cities: [{ name: "Overall" }] })
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         //(new Date(e.target.date.value)).toUTCString() gives utc string for entered date
         //e.target.[fieldname].value will return the relevant data from form submission.
         Object.keys(options).forEach((property) => {
-            //if an option is empty, delete it before the query.
-            if (!options[property] || options[property] == "No data") {
+            //if an option is empty, delete it before generating the redirect URL.
+            if (!options[property] || options[property] == "Overall") {
                 delete options[property]
             }
         })
-        let report = await axios.post("/report", options)
-        //keep in mind this is the data for province, city data is nested deeper
-        console.log(report)
+        //generates the redirect URL using the options and adding 'report' to base URL.
+        const redirect = new URL(window.location.href + "report")
+        redirect.search = new URLSearchParams(options)
+        //redirects the user to the results page with search parameters.
+        window.location.href = redirect
     }
 
     useEffect(async () => {
@@ -46,22 +48,27 @@ const Options = () => {
                         ', AA' as a substring where AA=state symbol
                         (ex. norfolk county, MA) as these are counties, not states*/
                         regions.splice(i, 1)
+                        i--
                     }
                 }
             }
+            //removes manually detected dataless countries from the dropdown menu
             for(let i=0; i<countries.length; i++){
                 if (datalessCountries.includes(countries[i].name)){
                     countries.splice(i, 1)
                     i--
                 }
             }
-            console.log(countries)
             //if the first regional province is empty & there are other options, remove the empty option.
             if (!regions[0].province && regions.length > 1) {
                 regions.shift();
             }
             else if (regions.length == 1) {
-                regions = [{ province: "No data" }]
+                regions = [{ province: "Overall" }]
+            }
+            if (regions[0].province != "Overall"){
+                console.log(regions)
+                regions.unshift({province: "Overall"})
             }
             setSelections({ ...selections, countries: countries, regions: regions })
             //resets the selected index of the region-select element to 0.
@@ -85,14 +92,24 @@ const Options = () => {
         needed as appropriate. */
         if (cities.data) {
             cities = cities.data[0].region.cities
+            //provides an overall option for not specifying a city
+            cities.unshift("Overall")
         }
         //sometimes the data immediately has an array instead of a data key with a value of an array.
         else if (cities[0]) {
             cities = cities[0].region.cities
+            //sometimes this data "exists" but is empty
+            if(cities.length == 0){
+                cities = [{name: "Overall"}]
+            }
+            else{
+                //provides an overall option for not specifying a city
+                cities.unshift("Overall")
+            }
         }
         //not all regions have city specific data, this covers that contingency. 
         else {
-            cities = [{ name: "No data" }]
+            cities = [{ name: "Overall" }]
         }
         //resets the city selector to the first option
         document.getElementById("city-select").selectedIndex = 0;
@@ -101,6 +118,7 @@ const Options = () => {
             setOptions({ ...options, city_name: cities[0].name })
         }
     }, options.region_province)
+
     return (
         <div id="form-box">
             <form id="option-inputs" onSubmit={(e) => { handleSubmit(e) }}>
