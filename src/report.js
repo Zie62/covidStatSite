@@ -5,8 +5,8 @@ import ReactDOM from 'react-dom';
 
 
 const Results = () => {
+    
     const [results, setResults] = useState({})
-
     //expected potential parameters from the previous page
     const expectedParams = ["iso", "region_province", "city_name", "date"]
     const params = new URLSearchParams(window.location.search);
@@ -46,12 +46,31 @@ const Results = () => {
         }
         else {
             report = report.data[0]
+            /*if a city has been named in the query and data has been retrieved for it,
+            set the report data equal to the data for that specific city*/
+            if(options.city_name && report.region.cities[0]){
+                //updates the report data with the cities specific data
+                let cityData = report.region.cities[0]
+                report = {...report, confirmed:cityData.confirmed, 
+                confirmed_diff: cityData.confirmed_diff, deaths: cityData.deaths,
+                 deaths_diff: cityData.deaths_diff}
+            }
             console.log(report)
             setResults(report)
         }
         return
         //need to have an error handling section for empty data + network errors
     }
+
+    //checks if a city has been selected
+    const cityCheck = () =>{
+        if (options.city_name){
+            return(options.city_name)
+        }
+        else{return("Overall")}
+    }
+    
+    //runs this only if the report has not yet been retrieved, and puts loading on the 
     if (Object.keys(results).length == 0) {
         getReport()
         return (
@@ -74,7 +93,7 @@ const Results = () => {
         <>
             <h1><a href={window.location.origin}>Make another request</a></h1>
             <div id="form-box">
-                <h1>Country: {results.region.name} <br /> Province/State: {results.region.province}</h1>
+                <h1>Country: {results.region.name} <br /> Province/State: {results.region.province} <br /> City: {cityCheck()}</h1>
                 <h2>As of: {results.date}</h2>
                 <p>Total Cases: {results.confirmed}</p>
                 <p>Cases this day: {results.confirmed_diff}</p>
