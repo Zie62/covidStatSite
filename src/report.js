@@ -91,10 +91,10 @@ const Results = () => {
     //this return is only reached with valid data to populate it.
     return (
         <>
-            <h1><a href={window.location.origin}>Make another request</a></h1>
+            <h1 id="new-query"><a href={window.location.origin}>Make another request</a></h1>
             <div id="form-box">
-                <h1>Country: {results.region.name} <br /> Province/State: {results.region.province} <br /> City: {cityCheck()}</h1>
-                <h2>As of: {results.date}</h2>
+                <h1 id="location-data">Country: {results.region.name} <br /> Province/State: {results.region.province} <br /> City: {cityCheck()}</h1>
+                <h2 id="query-date">As of: {results.date}</h2>
                 <p>Total Cases: {results.confirmed}</p>
                 <p>Cases this day: {results.confirmed_diff}</p>
                 <p>Total Deaths: {results.deaths}</p>
