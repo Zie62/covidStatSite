@@ -2,9 +2,13 @@ import './app.css'
 import axios from 'axios';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
+import NavBar from './components/Navigation';
 
 
 const Results = () => {
+    // if (window.location.pathname == "global"){
+    // skip the other stuff and render global statistics for today
+    // }
     const [fullData, setFullData] = useState({})
     const [results, setResults] = useState({})
     //expected potential parameters from the previous page
@@ -135,7 +139,7 @@ const Results = () => {
     else if (Object.keys(results).length == 1) {
         return (
             <>
-                <h2>There is no data for the requested area, inputs are otherwise invalid, or the service is currently down.</h2>
+                <h2>There is no data for the requested area.</h2>
             </>
         )
     }
@@ -160,4 +164,9 @@ const Results = () => {
     )
 }
 
-ReactDOM.render(<Results />, document.getElementById("root"))
+ReactDOM.render(
+    <>
+        <NavBar />
+        <Results />
+    </>,
+    document.getElementById("root"))

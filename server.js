@@ -69,11 +69,11 @@ app.post("/regionreports", async (req, res) => {
             'x-rapidapi-key': process.env.RAPIDKEY
         }
     }
-    try{
+    try {
         let info = await axios.request(options)
         res.json(info.data.data)
     }
-    catch (error){
+    catch (error) {
         console.log(error)
         res.status(500).send();
     }
@@ -89,11 +89,11 @@ app.post("/report", async (req, res) => {
             'x-rapidapi-key': process.env.RAPIDKEY
         }
     }
-    try{
+    try {
         let info = await axios.request(options)
         res.json(info.data.data)
     }
-    catch (error){
+    catch (error) {
         console.log(error)
         res.status(500).send();
     }

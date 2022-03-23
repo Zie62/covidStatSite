@@ -2,6 +2,7 @@ import './app.css'
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import NavBar from './components/Navigation';
 
 //dataless countries which are retrieved from the API are put in this array to be filtered.
 //doing this manually as it would take an extra 217 API requests per load to do procedurally.
@@ -154,6 +155,7 @@ const Options = () => {
 
 ReactDOM.render(
     <>
+        <NavBar />
         <Options />
     </>,
     document.getElementById('root'));
