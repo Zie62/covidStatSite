@@ -13,13 +13,14 @@ body{
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center;
 }
 #form-box{
     text-align: center;
     display:flex;
     flex-direction: column;
     width: 80%;
-    height: 60%;
+    height: 70%;
     border: 2px solid black;
     margin-top: 5px;
     justify-content: center;
@@ -42,4 +43,26 @@ body{
 }
 .options{
     font-size: large
+}
+#location-data{
+    font-weight:bold;
+    font-size: x-large;
+    margin: 0 0;
+}
+#city-options-label{
+    margin: 2% 0 0 0;
+    font-weight: bold;
+    font-size:large;
+}
+#city-options{
+    width:45%;
+    margin:0;
+}
+#info-div{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+}
+#query-date{
+    width:80%;
+    border-bottom: 2px solid black;
 }

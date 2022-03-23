@@ -5,8 +5,8 @@ import ReactDOM from 'react-dom';
 
 //dataless countries which are retrieved from the API are put in this array to be filtered.
 //doing this manually as it would take an extra 217 API requests per load to do procedurally.
-const datalessCountries = ["Western Sahara", "Martinique", "Liechtenstein", 
-"Faroe Islands", "Saint Barthelemy", "Gibraltar", "Others"]
+const datalessCountries = ["Western Sahara", "Martinique", "Liechtenstein",
+    "Faroe Islands", "Saint Barthelemy", "Gibraltar", "Others"]
 
 const Options = () => {
     //options object for the various search parameters
@@ -53,8 +53,8 @@ const Options = () => {
                 }
             }
             //removes manually detected dataless countries from the dropdown menu
-            for(let i=0; i<countries.length; i++){
-                if (datalessCountries.includes(countries[i].name)){
+            for (let i = 0; i < countries.length; i++) {
+                if (datalessCountries.includes(countries[i].name)) {
                     countries.splice(i, 1)
                     i--
                 }
@@ -66,9 +66,9 @@ const Options = () => {
             else if (regions.length == 1) {
                 regions = [{ province: "Overall" }]
             }
-            if (regions[0].province != "Overall"){
+            if (regions[0].province != "Overall") {
                 console.log(regions)
-                regions.unshift({province: "Overall"})
+                regions.unshift({ province: "Overall" })
             }
             setSelections({ ...selections, countries: countries, regions: regions })
             //resets the selected index of the region-select element to 0.
@@ -99,10 +99,10 @@ const Options = () => {
         else if (cities[0]) {
             cities = cities[0].region.cities
             //sometimes this data "exists" but is empty
-            if(cities.length == 0){
-                cities = [{name: "Overall"}]
+            if (cities.length == 0) {
+                cities = [{ name: "Overall" }]
             }
-            else{
+            else {
                 //provides an overall option for not specifying a city
                 cities.unshift("Overall")
             }
@@ -120,32 +120,35 @@ const Options = () => {
     }, options.region_province)
 
     return (
-        <div id="form-box">
-            <form id="option-inputs" onSubmit={(e) => { handleSubmit(e) }}>
-                <label className="input-labels" for="countryiso">Select your country:</label><br />
-                <select id="country-select" className="selector" name="countryiso" onChange={(e) => { setOptions({ ...options, iso: e.target.value, region_province: "", city_name: "" }) }}>
-                    {selections.countries.map((country) => (
-                        <option className="options" value={country.iso}>{country.name}</option>
-                    ))}
-                </select><br />
-                <label className="input-labels" for="region">Select your province or state:</label><br />
-                <select id="region-select" className="selector" name="region" onChange={(e) => { setOptions({ ...options, region_province: e.target.value, city_name: "" }) }}>
-                    {selections.regions.map((region, i) => (
-                        <option className="options" key={i} value={region.province}>{region.province}</option>
-                    ))}
-                </select><br />
-                <label className="input-labels" for='city'>Select your city's name(Not all cities have data): </label><br />
-                <select id="city-select" className="selector" name="city" onChange={(e) => { setOptions({ ...options, city_name: e.target.value }) }}>
-                    {selections.cities.map((city, i) => (
-                        <option className="options" key={i} value={city.name}>{city.name}</option>
-                    ))}
-                </select><br />
-                <label className="input-labels" for='date'>Enter the date you want data for: </label><br />
-                {/*Max date is the day before whatever day it is, min date is first day of data for china from the API. */}
-                <input id="date-select" className="selector" max={new Date(Date.now() - 86400000).toLocaleDateString('en-ca')} min={"2020-01-22"} type="date" name="date" value={options.date} onChange={(e) => setOptions({ ...options, date: e.target.value })} /> <br />
-                <input type="submit" value="submit" />
-            </form>
-        </div>
+        <>
+            <h1>COVID-19 Numbers by region and day:</h1>
+            <div id="form-box">
+                <form id="option-inputs" onSubmit={(e) => { handleSubmit(e) }}>
+                    <label className="input-labels" for="countryiso">Select your country:</label><br />
+                    <select id="country-select" className="selector" name="countryiso" onChange={(e) => { setOptions({ ...options, iso: e.target.value, region_province: "", city_name: "" }) }}>
+                        {selections.countries.map((country) => (
+                            <option className="options" value={country.iso}>{country.name}</option>
+                        ))}
+                    </select><br />
+                    <label className="input-labels" for="region">Select your province or state:</label><br />
+                    <select id="region-select" className="selector" name="region" onChange={(e) => { setOptions({ ...options, region_province: e.target.value, city_name: "" }) }}>
+                        {selections.regions.map((region, i) => (
+                            <option className="options" key={i} value={region.province}>{region.province}</option>
+                        ))}
+                    </select><br />
+                    <label className="input-labels" for='city'>Select your city's name(Not all cities have data): </label><br />
+                    <select id="city-select" className="selector" name="city" onChange={(e) => { setOptions({ ...options, city_name: e.target.value }) }}>
+                        {selections.cities.map((city, i) => (
+                            <option className="options" key={i} value={city.name}>{city.name}</option>
+                        ))}
+                    </select><br />
+                    <label className="input-labels" for='date'>Enter the date you want data for: </label><br />
+                    {/*Max date is the day before whatever day it is, min date is first day of data for china from the API. */}
+                    <input id="date-select" className="selector" max={new Date(Date.now() - 86400000).toLocaleDateString('en-ca')} min={"2020-01-22"} type="date" name="date" value={options.date} onChange={(e) => setOptions({ ...options, date: e.target.value })} /> <br />
+                    <input type="submit" value="submit" />
+                </form>
+            </div>
+        </>
     )
 }
 

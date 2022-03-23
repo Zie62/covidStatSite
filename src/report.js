@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom';
 
 
 const Results = () => {
-    
+    const [fullData, setFullData] = useState({})
     const [results, setResults] = useState({})
     //expected potential parameters from the previous page
     const expectedParams = ["iso", "region_province", "city_name", "date"]
@@ -22,7 +22,11 @@ const Results = () => {
     }
     //if the site is accessed with no search params, it loads data from global-report instead
     const getReport = async () => {
+        //city will be removed from options here to allow for city selection on results page
         let report = await axios.post("/report", options)
+        console.log("full report data")
+        console.log(report.data)
+        setFullData(report.data)
         if (report.data.length == 0 || report.status == 500) {
             setResults({ empty: "empty" })
             return
@@ -31,7 +35,8 @@ const Results = () => {
         if (!options.region_province) {
             //report.data contains array of each provinces data
             let starting = report.data[0]
-            if(!options.iso){
+            console.log(starting)
+            if (!options.iso) {
                 starting.region.name = "Overall"
             }
             starting.region.province = "Overall"
@@ -44,32 +49,78 @@ const Results = () => {
             }
             setResults(starting)
         }
+        //if a province is specified, set results equal to said province's data
         else {
             report = report.data[0]
+            console.log(report)
             /*if a city has been named in the query and data has been retrieved for it,
             set the report data equal to the data for that specific city*/
-            if(options.city_name && report.region.cities[0]){
+            if (options.city_name && report.region.cities[0]) {
                 //updates the report data with the cities specific data
                 let cityData = report.region.cities[0]
-                report = {...report, confirmed:cityData.confirmed, 
-                confirmed_diff: cityData.confirmed_diff, deaths: cityData.deaths,
-                 deaths_diff: cityData.deaths_diff}
+                report = {
+                    ...report, confirmed: cityData.confirmed,
+                    confirmed_diff: cityData.confirmed_diff, deaths: cityData.deaths,
+                    deaths_diff: cityData.deaths_diff
+                }
             }
             console.log(report)
             setResults(report)
         }
+        //return void for async resolution
         return
-        //need to have an error handling section for empty data + network errors
     }
 
-    //checks if a city has been selected
-    const cityCheck = () =>{
-        if (options.city_name){
-            return(options.city_name)
+    //renders the city select element
+    const citySelector = () => {
+        //if a specific province is selected, and that province has cities, render the city selection
+        if (results.region.province != "Overall" && results.region.cities[0] && results.region.cities.length > 1) {
+            return (
+                <>
+                    <p id="city-options-label">City:</p><br />
+                    <select id="city-options" name="cities" onChange={(e) => { cityChange(e) }}>
+                        <option className="options">Overall</option>
+                        {results.region.cities.map((city, i) => (
+                            <option className="options" key={i}>{city.name}</option>
+                        ))}
+                    </select>
+                </>
+            )
         }
-        else{return("Overall")}
+        else if (results.region.cities.length == 1) {
+            return (
+                <h2>City: {results.region.cities[0].name}</h2>
+            )
+        }
     }
-    
+
+    //Updates displayed information if the city is changed using the selector
+    const cityChange = (e) => {
+        e.preventDefault();
+        //e.target.value is new city
+        let cities = fullData[0].region.cities
+        if (e.target.value != "Overall") {
+            //finds the city object with the matching name
+            let localCity = cities.find(obj => {
+                return obj.name === e.target.value
+            })
+            setResults({
+                ...results, confirmed: localCity.confirmed,
+                confirmed_diff: localCity.confirmed_diff, deaths: localCity.deaths,
+                deaths_diff: localCity.deaths_diff
+            })
+        }
+        else {
+            //short name for ease of writing
+            let fd = fullData[0]
+            //return to overall stats
+            setResults({
+                ...results, confirmed: fd.confirmed, confirmed_diff: fd.confirmed_diff,
+                deaths: fd.deaths, deaths_diff: fd.deaths_diff
+            })
+        }
+    }
+
     //runs this only if the report has not yet been retrieved, and puts loading on the 
     if (Object.keys(results).length == 0) {
         getReport()
@@ -93,14 +144,17 @@ const Results = () => {
         <>
             <h1 id="new-query"><a href={window.location.origin}>Make another request</a></h1>
             <div id="form-box">
-                <h1 id="location-data">Country: {results.region.name} <br /> Province/State: {results.region.province} <br /> City: {cityCheck()}</h1>
-                <h2 id="query-date">As of: {results.date}</h2>
-                <p>Total Cases: {results.confirmed}</p>
-                <p>Cases this day: {results.confirmed_diff}</p>
-                <p>Total Deaths: {results.deaths}</p>
-                <p>Deaths on this day: {results.deaths_diff}</p>
-                <p>Death Rate: {(results.deaths / results.confirmed * 100).toFixed(4)}%</p>
-                <p>Please note some states only update cases weekly or on other irregular schedules.</p>
+                <p id="location-data">Country: {results.region.name} <br /> Province/State: {results.region.province}</p>
+                {citySelector()}
+                <h3 id="query-date">As of: {results.date}</h3>
+                <div id="info-div">
+                    <p className="info">Total Cases: {results.confirmed}</p>
+                    <p className="info">Cases on this day: {results.confirmed_diff}</p>
+                    <p className="info">Total Deaths: {results.deaths}</p>
+                    <p className="info">Deaths on this day: {results.deaths_diff}</p>
+                    <p className="info">Death Rate: {(results.deaths / results.confirmed * 100).toFixed(4)}%</p>
+                    <p className="info">Please note some countries, provinces, and states only update cases weekly or on other irregular schedules.</p>
+                </div>
             </div>
         </>
     )

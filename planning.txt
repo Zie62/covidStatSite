@@ -1,4 +1,1 @@
-Make city specific queries display that they are in fact city specific. (And make the numbers line up)
-Give a city / region dropdown on results page to allow users to explore the data 
-without returning to the original selection page.
-Clean up fringe errors / contingencies.
+Stylization

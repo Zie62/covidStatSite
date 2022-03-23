@@ -9,6 +9,7 @@ describe("queries", () => {
         cy.get("#date-select").click().type("2021-03-21")
         //submit the form to get the query
         cy.get("[type='submit']").click()
+        //verify date properly parsed
         cy.get("#query-date").then((date) => expect("As of: 2021-03-21").to.equal(date[0].innerHTML))
     })
 })
