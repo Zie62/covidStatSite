@@ -21,6 +21,10 @@ app.get("/", (req, res) => {
 app.get("/report", (req, res) => {
     res.sendFile(path.join(__dirname, "production", "report.html"))
 })
+app.get("/global", (req, res) => {
+    res.sendFile(path.join(__dirname, "production", "report.html"))
+})
+
 app.post('/regioncodes', async (req, res) => {
     let options = {
         method: 'GET',
@@ -79,14 +83,30 @@ app.post("/regionreports", async (req, res) => {
     }
 })
 app.post("/report", async (req, res) => {
+    let options
+    //on the global frontend page, i send an object with property global: true.
+    if (req.body.global) {
+        options = {
+            method: 'GET',
+            url: 'https://covid-19-statistics.p.rapidapi.com/reports/total',
+            params: { date: req.body.date },
+            headers: {
+                'x-rapidapi-host': process.env.RAPIDHOST,
+                'x-rapidapi-key': process.env.RAPIDKEY
+            }
+        }
+
+    }
     //this supplies the final report of data from the selected options on the form.
-    let options = {
-        method: 'GET',
-        url: 'https://covid-19-statistics.p.rapidapi.com/reports',
-        params: req.body,
-        headers: {
-            'x-rapidapi-host': process.env.RAPIDHOST,
-            'x-rapidapi-key': process.env.RAPIDKEY
+    else {
+        options = {
+            method: 'GET',
+            url: 'https://covid-19-statistics.p.rapidapi.com/reports',
+            params: req.body,
+            headers: {
+                'x-rapidapi-host': process.env.RAPIDHOST,
+                'x-rapidapi-key': process.env.RAPIDKEY
+            }
         }
     }
     try {

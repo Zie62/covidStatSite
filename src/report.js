@@ -6,9 +6,6 @@ import NavBar from './components/Navigation';
 
 
 const Results = () => {
-    // if (window.location.pathname == "global"){
-    // skip the other stuff and render global statistics for today
-    // }
     const [fullData, setFullData] = useState({})
     const [results, setResults] = useState({})
     //expected potential parameters from the previous page
@@ -16,27 +13,45 @@ const Results = () => {
     const params = new URLSearchParams(window.location.search);
     let options = {}
     //takes the URLSearchParam object and translates it into a regular javascript object
-    for (let i = 0; i < expectedParams.length; i++) {
-        let key = expectedParams[i]
-        let value = params.get(expectedParams[i])
-        //if the value exists, assign it to the object
-        if (value) {
-            options[key] = value
+    if (window.location.pathname === "/global") {
+        options = { global: true }
+        //if there is a date in parameters, compare it to valid dates and add to options if valid.
+        if (params.get("date")) {
+            let date = new Date(params.get("date"))
+            //if the date is valid, add it to options (otherwise, dont)
+            if (date > new Date("2020-01-22") && date < new Date(Date.now() - 86400000)) {
+                options.date = params.get("date")
+            }
+        }
+    }
+    else {
+        for (let i = 0; i < expectedParams.length; i++) {
+            let key = expectedParams[i]
+            let value = params.get(expectedParams[i])
+            //if the value exists, assign it to the object
+            if (value) {
+                options[key] = value
+            }
         }
     }
     //if the site is accessed with no search params, it loads data from global-report instead
     const getReport = async () => {
         //city will be removed from options here to allow for city selection on results page
         let report = await axios.post("/report", options)
-        console.log("full report data")
-        console.log(report.data)
         setFullData(report.data)
         if (report.data.length == 0 || report.status == 500) {
             setResults({ empty: "empty" })
             return
         }
         //if there isnt a specified province, adds up the pieces to get overall data.
-        if (!options.region_province) {
+        if (options.global) {
+            let data = report.data
+            data.region = {}
+            data.region.name = "Global"
+            data.region.province = "Global"
+            setResults(report.data)
+        }
+        else if (!options.region_province) {
             //report.data contains array of each provinces data
             let starting = report.data[0]
             console.log(starting)
@@ -77,6 +92,10 @@ const Results = () => {
 
     //renders the city select element
     const citySelector = () => {
+        //if this is the global page, don't render the city or city selector (return void)
+        if (options.global) {
+            return
+        }
         //if a specific province is selected, and that province has cities, render the city selection
         if (results.region.province != "Overall" && results.region.cities[0] && results.region.cities.length > 1) {
             return (
@@ -146,7 +165,6 @@ const Results = () => {
     //this return is only reached with valid data to populate it.
     return (
         <>
-            <h1 id="new-query"><a href={window.location.origin}>Make another request</a></h1>
             <div id="form-box">
                 <p id="location-data">Country: {results.region.name} <br /> Province/State: {results.region.province}</p>
                 {citySelector()}
