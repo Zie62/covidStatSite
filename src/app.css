@@ -37,7 +37,7 @@ body{
 .nav-items{
     margin-left: 3%;
     color: white;
-    font-size:large;
+    font-size:xx-large;
     text-decoration: none;
 }
 .nav-items:hover{
@@ -62,38 +62,45 @@ body{
     align-items: center;
 }
 .input-labels{
-    font-size: x-large;
+    font-size: xx-large;
 }
 .selector{
     margin: 10px 10px;
     height:10%;
     width: 80%;
-    font-size: x-large;
+    font-size: xx-large;
 }
 .options{
-    font-size: large
+    font-size: xx-large
 }
 #location-data{
     font-weight:bold;
-    font-size: x-large;
+    font-size: xxx-large;
     margin: 0 0;
 }
 #city-options-label{
     margin: 2% 0 0 0;
     font-weight: bold;
-    font-size:large;
+    font-size:xx-large;
 }
 #city-options{
     width:45%;
+    height:5%;
+    font-size: xx-large;
     margin:0;
 }
 #info-div{
     display:grid;
     grid-template-columns: 1fr 1fr;
 }
+.info{
+    font-size: xx-large;
+    font-weight: 600;
+}
 #query-date{
     width:80%;
     border-bottom: 2px solid black;
+    font-size: xx-large;
 }
 @media (max-width: 961px) and (max-height: 720px) {
     #form-box{
