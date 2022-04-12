@@ -54,7 +54,6 @@ const Results = () => {
         else if (!options.region_province) {
             //report.data contains array of each provinces data
             let starting = report.data[0]
-            console.log(starting)
             if (!options.iso) {
                 starting.region.name = "Overall"
             }
@@ -71,7 +70,6 @@ const Results = () => {
         //if a province is specified, set results equal to said province's data
         else {
             report = report.data[0]
-            console.log(report)
             /*if a city has been named in the query and data has been retrieved for it,
             set the report data equal to the data for that specific city*/
             if (options.city_name && report.region.cities[0]) {
@@ -83,7 +81,6 @@ const Results = () => {
                     deaths_diff: cityData.deaths_diff
                 }
             }
-            console.log(report)
             setResults(report)
         }
         //return void for async resolution

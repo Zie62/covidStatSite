@@ -95,3 +95,8 @@ body{
     width:80%;
     border-bottom: 2px solid black;
 }
+@media (max-width: 961px) and (max-height: 720px) {
+    #form-box{
+        height: 100%;
+    }
+}

@@ -3,7 +3,6 @@ import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import NavBar from './components/Navigation';
-
 //dataless countries which are retrieved from the API are put in this array to be filtered.
 //doing this manually as it would take an extra 217 API requests per load to do procedurally.
 const datalessCountries = ["Western Sahara", "Martinique", "Liechtenstein",
@@ -39,8 +38,8 @@ const Options = () => {
             let regions = await axios.post("/localregions", { iso: options.iso })
             regions = regions.data
             countries = countries.data
-            /*removes counties from regions box (only want states), 
-                as they dont correspond to any data*/
+            /*removes counties from regions box (only want states or other 
+                relevant regions), as they dont correspond to any data*/
             if (options.iso == "USA") {
                 let regex = /,\s[A-Za-z]+/
                 for (let i = 0; i < regions.length; i++) {
@@ -68,7 +67,6 @@ const Options = () => {
                 regions = [{ province: "Overall" }]
             }
             if (regions[0].province != "Overall") {
-                console.log(regions)
                 regions.unshift({ province: "Overall" })
             }
             setSelections({ ...selections, countries: countries, regions: regions })
@@ -122,7 +120,7 @@ const Options = () => {
 
     return (
         <>
-            <h1>COVID-19 Numbers by region and day:</h1>
+            <h1>COVID-19 Numbers by region and day</h1>
             <div id="form-box">
                 <form id="option-inputs" onSubmit={(e) => { handleSubmit(e) }}>
                     <label className="input-labels" for="countryiso">Select your country:</label><br />
